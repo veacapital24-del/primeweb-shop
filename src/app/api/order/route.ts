@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server'
-import { adminClient } from '@/lib/supabase/admin'
+import { createClient } from '@supabase/supabase-js'
 import type { CartLine } from '@/types/db'
+
+// Public order endpoint. RLS on `orders` and `order_items` permits anon INSERT
+// (`with check (true)`), so we use the anon key here instead of the service-role
+// key — that key isn't available to the storefront project anyway.
+function publicClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  )
+}
 
 type Body = {
   cart: CartLine[]
@@ -18,7 +29,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'empty cart' }, { status: 400 })
   }
 
-  const sb = adminClient()
+  const sb = publicClient()
 
   // Look up live prices server-side — never trust client totals
   const ids = body.cart.map((l) => l.product_id)
@@ -27,6 +38,7 @@ export async function POST(req: Request) {
     .select('id, retail_price_mur, wholesale_price_mur')
     .in('id', ids)
   if (prodErr || !products) {
+    console.error('[order] product lookup failed', prodErr)
     return NextResponse.json({ error: prodErr?.message ?? 'products lookup failed' }, { status: 500 })
   }
 
@@ -63,10 +75,12 @@ export async function POST(req: Request) {
     .single()
 
   if (orderErr || !order) {
+    console.error('[order] order insert failed', orderErr)
     return NextResponse.json({ error: orderErr?.message ?? 'order insert failed' }, { status: 500 })
   }
 
-  await sb.from('order_items').insert(items.map((i) => ({ ...i, order_id: order.id })))
+  const { error: itemsErr } = await sb.from('order_items').insert(items.map((i) => ({ ...i, order_id: order.id })))
+  if (itemsErr) console.error('[order] order_items insert failed', itemsErr)
 
   if (reelId) {
     await sb.from('reel_events').insert({

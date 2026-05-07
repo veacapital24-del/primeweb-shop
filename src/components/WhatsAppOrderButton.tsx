@@ -43,13 +43,15 @@ export function WhatsAppOrderButton({ products, reelSlug, className, label }: Pr
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cart, mode, shop, reelSlug, channel: reelSlug ? 'reel' : 'whatsapp' }),
-        }).catch(() => {})
+        })
+          .then(async (r) => { if (!r.ok) console.error('[order] failed', r.status, await r.text()) })
+          .catch((err) => console.error('[order] network error', err))
         if (reelSlug) {
           fetch('/api/track', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reelSlug, eventType: 'whatsapp_click' }),
-          }).catch(() => {})
+          }).catch((err) => console.error('[track] network error', err))
         }
       }}
       className={
