@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useCart, useMode, useShop } from '@/lib/cart'
+import { useCart, useMode, useShop, clearCart } from '@/lib/cart'
 import { buildOrderMessage, whatsappLink } from '@/lib/whatsapp'
 import type { ProductStock } from '@/types/db'
 
@@ -44,7 +44,10 @@ export function WhatsAppOrderButton({ products, reelSlug, className, label }: Pr
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cart, mode, shop, reelSlug, channel: reelSlug ? 'reel' : 'whatsapp' }),
         })
-          .then(async (r) => { if (!r.ok) console.error('[order] failed', r.status, await r.text()) })
+          .then(async (r) => {
+            if (r.ok) clearCart()
+            else console.error('[order] failed', r.status, await r.text())
+          })
           .catch((err) => console.error('[order] network error', err))
         if (reelSlug) {
           fetch('/api/track', {
