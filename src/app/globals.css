@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  /* Primeweb brand greens — dark forest "Prime" + sage "web" */
+  --color-prime-50:  #ecf5ee;
+  --color-prime-100: #d3ebd9;
+  --color-prime-200: #aed8b9;
+  --color-prime-300: #82c094;
+  --color-prime-400: #6baa82;   /* matches "web" sage */
+  --color-prime-500: #3d8556;
+  --color-prime-600: #246340;
+  --color-prime-700: #16442a;   /* matches "Prime" forest */
+  --color-prime-800: #0f3320;
+  --color-prime-900: #082014;
+
+  --color-flash-50:  #fff1f0;
+  --color-flash-500: #ef3b2c;
+  --color-flash-600: #d62517;
+  --color-flash-700: #b51d11;
+
+  /* Mint kept as a brighter success accent, distinct from primary green */
+  --color-mint-100:  #d8f5e6;
+  --color-mint-500:  #18b466;
+  --color-mint-600:  #0d8c4a;
+
+  --color-ink-100:   #f0eee8;
+  --color-ink-200:   #e2dfd7;
+  --color-ink-300:   #cfcabe;
+  --color-ink-500:   #76746c;
+  --color-ink-700:   #353330;
+  --color-ink-900:   #11130f;
+  --color-ink-950:   #070906;
+
+  --color-paper:     #f8f5ee;
+  --color-paper-dim: #ede9de;
+
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-display), ui-serif, Georgia, serif;
+}
+
+@layer base {
+  html, body {
+    background: var(--color-paper);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-feature-settings: "ss01";
+}
+
+/* ─── grain + paper texture ─── */
+.bg-grain {
+  background-image:
+    radial-gradient(rgba(22,68,42,0.06) 1px, transparent 1px),
+    radial-gradient(rgba(22,68,42,0.04) 1px, transparent 1px);
+  background-size: 18px 18px, 9px 9px;
+  background-position: 0 0, 9px 9px;
+}
+
+/* ─── animations ─── */
+@keyframes pulse-flash {
+  0%, 100% { background-color: var(--color-flash-500); box-shadow: 0 0 0 0 rgba(239,59,44,0.55); }
+  50%      { background-color: var(--color-flash-700); box-shadow: 0 0 0 10px rgba(239,59,44,0); }
+}
+.animate-pulse-flash { animation: pulse-flash 1.4s ease-in-out infinite; }
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker { animation: ticker 40s linear infinite; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-12px) rotate(2deg); }
+}
+.animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+
+@keyframes shine {
+  0%   { transform: translateX(-110%) skewX(-12deg); }
+  100% { transform: translateX(210%)  skewX(-12deg); }
+}
+.animate-shine { animation: shine 2.4s ease-in-out infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fade-up 0.5s ease-out both; }
+
+/* ─── selection + focus ─── */
+::selection { background: var(--color-prime-200); color: var(--color-ink-900); }
+
+:where(button, a):focus-visible {
+  outline: 2px solid var(--color-prime-500);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* hide scrollbar on horizontal carousels */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
